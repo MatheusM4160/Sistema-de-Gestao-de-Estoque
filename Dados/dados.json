@@ -1,0 +1,9 @@
+{
+  "estoque": {
+    "Produto exemplo": {
+      "dscri\u00c3\u00a7\u00c3\u00a3o": "esse produto \u00c3\u00a9 um exemplo",
+      "valor": 10,
+      "quantidade": 30
+    }
+  }
+}
