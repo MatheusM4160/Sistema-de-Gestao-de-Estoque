@@ -1,6 +1,0 @@
-- Sistema de gestão de estoque
-    * Ver itens do estoque
-    * Adicionar itens ao estoque
-    * Remover itens do estoque
-
-- JSON -> Armazenar as informações
