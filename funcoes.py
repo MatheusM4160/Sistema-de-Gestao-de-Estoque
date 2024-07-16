@@ -20,4 +20,3 @@ def interface(titulo = 'TITULO', lista = [], quant = 40):
     opcao = LeiaInteiros('Qual opção deseja? ')
     print('-'*quant)
     return opcao 
-    
