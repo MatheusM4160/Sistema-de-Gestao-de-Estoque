@@ -1,19 +1,15 @@
 from funcoes import *
 from armazenamento import *
 
-estoque = ler()
 
 while True:
+    estoque = ler()
+    
     opcao = interface('Gerenciamente de Estoque', ['Ver estoque', 'Adicionar item',
                 'Modificar estoque', 'Remover item', 'Sair'], 40)
     
     if opcao == 1:
-        for lista in estoque:
-            for produto in lista:
-                print(produto)
-                print(f'>  {lista[produto]['descricao']}')
-                print(f'>  R${lista[produto]['valor']}')
-                print(f'>  {lista[produto]['quantidade']} unidades')
+        Ver_itens()
 
     elif opcao == 2:
         produto_novo = Adicionar()
@@ -21,10 +17,10 @@ while True:
         escrever(estoque)
 
     elif opcao == 3:
-        pass
+        Modificar()
 
     elif opcao == 4:
-        pass
+        Remover()
 
     elif opcao == 5:
         print('Encerrando Sistema!')

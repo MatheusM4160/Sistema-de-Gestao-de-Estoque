@@ -1,9 +1,9 @@
 [
   {
-    "Biscoito": {
-      "descricao": "Oreo",
-      "valor": 8.99,
-      "quantidade": 35
+    "Produto exemplo": {
+      "descricao": "Escreva a descri\u00e7\u00e3o do seu produto",
+      "valor": 50.6,
+      "quantidade": 40
     }
   }
 ]

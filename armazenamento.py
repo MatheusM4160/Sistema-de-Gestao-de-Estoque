@@ -7,14 +7,17 @@ def ler():
         return json.load(arq)
 
 def escrever(dic):
+    """Função para escrever os dados em .json"""
     with open('Dados/dados.json', 'w') as arq:
         json.dump(dic, arq, indent=2)
 
 def Adicionar():
+    """Função para adicionar dados em um variavel"""
     def nome():
+        """Pegar o nome do produto novo"""
         while True:
             try:
-                nome = str(input('Nome do produto: '))
+                nome = str(input('Nome do produto: ')).capitalize().strip()
             except:
                 print('Nome invalido!')
             else:
@@ -22,9 +25,10 @@ def Adicionar():
                 break
     
     def descricao():
+        """Pegar a descricao do produto novo"""
         while True:
             try:
-                descricao = str(input('Descricao do produto: '))
+                descricao = str(input('Descricao do produto: ')).capitalize().strip()
             except:
                 print('Descricao invalida!')
             else:
@@ -32,6 +36,7 @@ def Adicionar():
                 break
 
     def valor():
+        """Pegar o valor do produto novo"""
         while True:
             try:
                 valor = float(input('Valor do porduto: '))
@@ -42,6 +47,7 @@ def Adicionar():
                 break
     
     def quantidade():
+        """Pegar a quantidade do produto novo"""
         while True:
             try:
                 quantidade = int(input('quantidade do produto: '))
@@ -53,7 +59,7 @@ def Adicionar():
 
     produto_novo = {nome() : 
                  {'descricao' : descricao(),
-                        'valor' : valor(),
-                    'quantidade' : quantidade()}}
+                  'valor' : valor(),
+                  'quantidade' : quantidade()}}
     
     return produto_novo
