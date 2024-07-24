@@ -1,4 +1,4 @@
-from armazenamento import *
+import armazenamento
 
 def LeiaInteiros(pergunta):
     """Função para verificar se os numeros são inteiros ou não"""
@@ -9,9 +9,8 @@ def LeiaInteiros(pergunta):
             print('Digite um número válido!')
         else:
             return numero
-            break    
 
-def interface(titulo = 'TITULO', lista = [], quant = 40):
+def Interface(titulo = 'TITULO', lista = [], quant = 40):
     """Função para criar uma interface"""  
     print('-'*quant)
     print(f'{titulo}'.center(quant))
@@ -27,7 +26,7 @@ def interface(titulo = 'TITULO', lista = [], quant = 40):
 
 def Ver_itens():
     """Função para ver os intens do estoque"""
-    estoque = ler()
+    estoque = armazenamento.ler()
     for lista in estoque:
         for produto in lista:
             valor = str(lista[produto]['valor'])
@@ -38,7 +37,7 @@ def Ver_itens():
 
 def Modificar():
     """Modificar os itens do estoque"""
-    estoque = ler()
+    estoque = armazenamento.ler()
     while True:
         try:
             pergunta = str(input('Qual o nome do produto? ')).capitalize().strip()
@@ -64,12 +63,12 @@ def Modificar():
                                             'valor' : valor,
                                             'quantidade' : quantidade}}
             
-        escrever(estoque)
+        armazenamento.escrever(estoque)
         return print('Alterado com Sucesso!')
 
 def Remover():
     """Remover o item do estoque"""
-    estoque = ler()
+    estoque = armazenamento.ler()
     while True:
         try:
             pergunta = str(input('Qual o nome do produto? ')).capitalize().strip()
@@ -90,5 +89,5 @@ def Remover():
     else:       
         estoque.pop(numerador)
                 
-        escrever(estoque)
+        armazenamento.escrever(estoque)
         return print('Removido com Sucesso!')

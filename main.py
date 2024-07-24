@@ -1,26 +1,26 @@
-from funcoes import *
-from armazenamento import *
+import funcoes
+import armazenamento
 
 
 while True:
-    estoque = ler()
+    estoque = armazenamento.ler()
     
-    opcao = interface('Gerenciamente de Estoque', ['Ver estoque', 'Adicionar item',
+    opcao = funcoes.Interface('Gerenciamente de Estoque', ['Ver estoque', 'Adicionar item',
                 'Modificar estoque', 'Remover item', 'Sair'], 40)
     
     if opcao == 1:
-        Ver_itens()
+        funcoes.Ver_itens()
 
     elif opcao == 2:
-        produto_novo = Adicionar()
+        produto_novo = armazenamento.Produto()
         estoque.append(produto_novo)
-        escrever(estoque)
+        armazenamento.escrever(estoque)
 
     elif opcao == 3:
-        Modificar()
+        funcoes.Modificar()
 
     elif opcao == 4:
-        Remover()
+        funcoes.Remover()
 
     elif opcao == 5:
         print('Encerrando Sistema!')
@@ -28,7 +28,7 @@ while True:
 
     elif opcao == 999:
         estoque.clear()
-        escrever(estoque)
+        armazenamento.escrever(estoque)
 
     else:
         print('Erro! opção inválida!')

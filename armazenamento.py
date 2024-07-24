@@ -11,55 +11,34 @@ def escrever(dic):
     with open('Dados/dados.json', 'w') as arq:
         json.dump(dic, arq, indent=2)
 
-def Adicionar():
-    """Função para adicionar dados em um variavel"""
-    def nome():
+def adicionar(pergunta, num = 1):
         """Pegar o nome do produto novo"""
         while True:
             try:
-                nome = str(input('Nome do produto: ')).capitalize().strip()
+                if num == 1:
+                    nome = str(input(pergunta)).capitalize().strip()
+                elif num == 2:
+                    nome = float(input(pergunta))
+                elif num == 3:
+                    nome = int(input(pergunta))
             except:
                 print('Nome invalido!')
             else:
                 return nome
-                break
-    
-    def descricao():
-        """Pegar a descricao do produto novo"""
-        while True:
-            try:
-                descricao = str(input('Descricao do produto: ')).capitalize().strip()
-            except:
-                print('Descricao invalida!')
-            else:
-                return descricao
-                break
 
-    def valor():
-        """Pegar o valor do produto novo"""
-        while True:
-            try:
-                valor = float(input('Valor do porduto: '))
-            except:
-                print('Valor invalido!')
-            else:
-                return valor
-                break
-    
-    def quantidade():
-        """Pegar a quantidade do produto novo"""
-        while True:
-            try:
-                quantidade = int(input('quantidade do produto: '))
-            except:
-                print('Quantidade invalida')
-            else:
-                return quantidade
-                break
+def Produto():   
 
-    produto_novo = {nome() : 
-                 {'descricao' : descricao(),
-                  'valor' : valor(),
-                  'quantidade' : quantidade()}}
+    nome = adicionar('Nome do produto: ')
+    
+    descricao = adicionar('Descricao do produto: ')
+        
+    valor = adicionar('Valor do porduto: ', 2)
+
+    quantidade = adicionar('quantidade do produto: ', 3)
+
+    produto_novo = {nome : 
+                 {'descricao' : descricao,
+                  'valor' : valor,
+                  'quantidade' : quantidade}}
     
     return produto_novo
