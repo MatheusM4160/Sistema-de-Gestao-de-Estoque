@@ -6,14 +6,23 @@ def main(page):
     estoque = armazenamento.ler()
     titulo = ft.Text('Gerenciamente de Estoque', theme_style=ft.TextThemeStyle.BODY_LARGE)
     
-    def fechar(e):
+    def fechar_erro(e):
         Erro.open = False
-        page.remove(Erro)
+        page.update(Erro)
 
+    def fechar_produto(e):
+        Produto_cadastrado.open = False
+        page.update(Produto_cadastrado)
+    
     titulo_erro = ft.Text('Erro!')
     campo_erro = ft.Text('Informações Inválidas!')
-    botao_fechar = ft.ElevatedButton('FECHAR!', on_click=fechar)
+    campo_produto_ja_cadastrado = ft.Text('Produto já Cadastrato!')
+    botao_fechar = ft.ElevatedButton('FECHAR!', on_click=fechar_erro)
     Erro = ft.AlertDialog(title=titulo_erro, content=campo_erro, actions=[botao_fechar])
+    botao_produto = ft.ElevatedButton('FECHAR!', on_click=fechar_produto)
+    Produto_cadastrado = ft.AlertDialog(title=titulo_erro, content=campo_produto_ja_cadastrado, actions=[botao_produto])
+
+
 
     def remover_item_do_estoque(e):
         page.remove(Botões)
@@ -22,19 +31,28 @@ def main(page):
             page.remove(descobrir_item, botoes_do_remover_item)
             page.add(Botões)
 
+        def remover_item(e):
+            nome_produto = produto
+            print(nome_produto)
+
         def procurar_item(e):
+            global produto
             produto_procurado = descobrir_item.value
             produto_procurado = produto_procurado.strip().capitalize()
             cont = 0
             numerador = -1
+            num = 0
             for item in estoque:
                 for produto in item:
                     if produto_procurado in produto:
+                        if num == 0:
+                            page.remove(descobrir_item, botoes_do_remover_item)
                         numerador = cont
-                        estoque.pop(numerador)
-                        armazenamento.escrever(estoque)
-                        page.remove(descobrir_item, botoes_do_remover_item)
-                        page.add(Botões)
+                        botao_remover = ft.ElevatedButton(produto, on_click=remover_item)
+                        #estoque.pop(numerador)
+                        #armazenamento.escrever(estoque)
+                        page.add(botao_remover)
+                        num = 1
                     else:
                         cont = cont + 1
             if numerador == -1:
@@ -140,12 +158,21 @@ def main(page):
     def adicionar_item(e):
         def sair_do_adicionar_item(e):
             page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, botoes_do_adicionar_itens)
-            page.add(Botões)        
+            page.add(Botões)
+            page.update()
             
         def sair_estoque_e_enviar_informacao(e):
+            num = 0
+            for item in estoque:
+                for produto in item:
+                    if campo_nome.value.strip().capitalize() == produto:
+                        num = 1
             if campo_nome.value == '' or campo_descricao.value == '' or campo_valor.value == '' or campo_quantidade.value == '':
                 Erro.open = True
                 page.add(Erro)
+            elif num == 1:
+                Produto_cadastrado.open = True
+                page.add(Produto_cadastrado)
             else:
                 page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, botoes_do_adicionar_itens)
                 page.add(Botões)
