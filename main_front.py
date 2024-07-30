@@ -14,6 +14,8 @@ def main(page):
         Produto_cadastrado.open = False
         page.update(Produto_cadastrado)
     
+
+
     titulo_erro = ft.Text('Erro!')
     campo_erro = ft.Text('Informações Inválidas!')
     campo_produto_ja_cadastrado = ft.Text('Produto já Cadastrato!')
@@ -30,64 +32,91 @@ def main(page):
         def sair_do_remover_item(e):
             page.remove(descobrir_item, botoes_do_remover_item)
             page.add(Botões)
-
-        def remover_item(e):
-            nome_produto = produto
-            print(nome_produto)
+            page.update()
 
         def procurar_item(e):
-            global produto
+
+            def voltar(e):
+                for botao in lista_botoes:
+                    page.remove(botao)
+                page.remove(voltar_ao_inicio)
+                lista_botoes.clear()
+                page.add(Botões)
+
+            def remover_item(produto, contador):
+                estoque.pop(contador)
+                armazenamento.escrever(estoque)
+                for botao in lista_botoes:
+                    page.remove(botao)
+                page.remove(voltar_ao_inicio)
+                lista_botoes.clear()
+                page.add(Botões)
+
+            voltar_ao_inicio = ft.ElevatedButton('Voltar', on_click=voltar)
+
             produto_procurado = descobrir_item.value
             produto_procurado = produto_procurado.strip().capitalize()
+            
+            lista_botoes = []
             cont = 0
             numerador = -1
             num = 0
-            for item in estoque:
-                for produto in item:
-                    if produto_procurado in produto:
-                        if num == 0:
-                            page.remove(descobrir_item, botoes_do_remover_item)
-                        numerador = cont
-                        botao_remover = ft.ElevatedButton(produto, on_click=remover_item)
-                        #estoque.pop(numerador)
-                        #armazenamento.escrever(estoque)
-                        page.add(botao_remover)
-                        num = 1
-                    else:
-                        cont = cont + 1
-            if numerador == -1:
+
+            if descobrir_item.value != '':
+                for item in estoque:
+                    for produto in item:
+                        if produto_procurado in produto:
+                            if num == 0:
+                                page.remove(descobrir_item, botoes_do_remover_item)
+                                page.add(voltar_ao_inicio)
+                            numerador = cont
+                            botao_remover = ft.ElevatedButton(produto, on_click=lambda e, p=produto, cont=numerador: remover_item(p, cont)) 
+                            lista_botoes.append(botao_remover)
+                            page.add(botao_remover)
+                            num = 1
+                    cont = cont + 1
+                if numerador == -1:
+                    Erro.open = True
+                    page.add(Erro)
+            else:
                 Erro.open = True
-                page.add(Erro)
+                page.add(Erro)           
 
         descobrir_item = ft.TextField(label='Procurar Item')
 
         botao_procurar = ft.ElevatedButton('Procurar', on_click=procurar_item)
-        botao_sair = ft.ElevatedButton('Sair', sair_do_remover_item)
+        botao_sair = ft.ElevatedButton('Sair', on_click=sair_do_remover_item)
   
         botoes_do_remover_item = ft.Row([botao_procurar, botao_sair])
 
         page.add(descobrir_item)
         page.add(botoes_do_remover_item)
 
-    def modificar_item(e):
+    def alterar_informacoes_do_produto(e):
+
         page.remove(Botões)
 
         def sair_do_modificar_item(e):
             page.remove(descobrir_item,botoes_do_modificar_item)
             page.add(Botões)
 
-        def produto_encontrado_do_modificar():
+        def produto_encontrado_do_modificar(a, b):
+            for botao in lista_botao:
+                page.remove(botao)
+            lista_botao.clear()
+
             def sair(e):
                 page.remove(alterar_descricao, alterar_valor, alterar_quantidade, botoes)
                 page.add(Botões)
 
-            def salvar(e):
+            def salvar(produto, numero):
+                cont = 1
                 if alterar_descricao.value != '':
                     nova_descricao = alterar_descricao.value
                     nova_descricao = nova_descricao.strip().capitalize()
-                    estoque[numerador][produto_procurado]['descricao'] = nova_descricao
+                    estoque[numero][produto]['descricao'] = nova_descricao
                 
-                if alterar_valor != '':
+                if alterar_valor.value != '':
                     try:
                         novo_valor = alterar_valor.value.strip()
                         novo_valor = novo_valor.replace(',', '.')
@@ -95,20 +124,21 @@ def main(page):
                     except:
                         cont = 0
                     else:
-                        estoque[numerador][produto_procurado]['valor'] = novo_valor
+                        estoque[numero][produto]['valor'] = novo_valor
                         cont = 1
                 
-                if alterar_quantidade != '':
+                if alterar_quantidade.value != '':
                     try:
                         nova_quantidade = alterar_quantidade.value.strip()
                         nova_quantidade = int(nova_quantidade)
                     except:
                         cont = 0
                     else:
-                        estoque[numerador][produto_procurado]['quantidade'] = nova_quantidade
+                        estoque[numero][produto]['quantidade'] = nova_quantidade
                         cont = 1
 
                 armazenamento.escrever(estoque)
+
                 if cont == 1:
                     page.remove(alterar_descricao, alterar_valor, alterar_quantidade, botoes)
                     page.add(Botões)
@@ -116,32 +146,53 @@ def main(page):
                     Erro.open = True
                     page.add(Erro)
 
-            global alterar_descricao, alterar_valor, alterar_quantidade
             alterar_descricao = ft.TextField(label='Nova Descrição')
             alterar_valor = ft.TextField(label='Novo Valor')
             alterar_quantidade = ft.TextField(label='Nova Quantidade')
 
-            botao_salvar_alteracao = ft.ElevatedButton('Salvar Alteração', on_click=salvar)
+            botao_salvar_alteracao = ft.ElevatedButton('Salvar Alteração', on_click=lambda e:salvar(a, b))
             botao_sair_sem_salvar = ft.ElevatedButton('Sair sem Salvar', on_click=sair)
             botoes = ft.Row([botao_salvar_alteracao, botao_sair_sem_salvar])
 
             page.add(alterar_descricao, alterar_valor, alterar_quantidade, botoes)
             
         def procurar_item(e):
-            global numerador, produto_procurado
+            def voltar(e):
+                for botao in lista_botao:
+                    page.remove(botao)
+                page.remove(voltar_inicio)
+                lista_botao.clear()
+                page.add(Botões)
+
+            global lista_botao
+            lista_botao = []
+
+            voltar_inicio = ft.ElevatedButton('Voltar', on_click=voltar)
+
             produto_procurado = descobrir_item.value
             produto_procurado = produto_procurado.strip().capitalize()
+
             cont = 0
             numerador = -1
-            for item in estoque:
-                for produto in item:
-                    if produto_procurado in produto:
-                        page.remove(descobrir_item, botoes_do_modificar_item)
-                        numerador = cont
-                        produto_encontrado_do_modificar()
-                    else:
-                        cont = cont + 1
-            if numerador == -1:
+            num = 0
+
+            if descobrir_item.value != '':
+                for item in estoque:
+                    for produto in item:
+                        if produto_procurado in produto:
+                            if num == 0:
+                                page.remove(descobrir_item, botoes_do_modificar_item)
+                                page.add(voltar_inicio)
+                            numerador = cont
+                            botao_item = ft.ElevatedButton(produto, on_click=lambda e, numerador=numerador, produto=produto: produto_encontrado_do_modificar(produto, numerador))
+                            page.add(botao_item)
+                            lista_botao.append(botao_item)
+                            num = 1
+                    cont = cont + 1
+                if numerador == -1:
+                    Erro.open = True
+                    page.add(Erro)
+            else:
                 Erro.open = True
                 page.add(Erro)
 
@@ -215,11 +266,11 @@ def main(page):
         page.add(botoes_do_adicionar_itens)
         
     def ver_estoque(e):
+        page.remove(Botões)
+
         def sair_estoque(e):
             page.remove(botao_sair_estoque, tabela_do_estoque)
             page.add(Botões)
-
-        page.remove(Botões)
         
         colunas = [
             ft.DataColumn(label=ft.Text('Produto')),
@@ -252,7 +303,7 @@ def main(page):
 
     botao_1 = ft.ElevatedButton('Ver Estoque', on_click=ver_estoque)
     botao_2 = ft.ElevatedButton('Adicionar Item', on_click=adicionar_item)
-    botao_3 = ft.ElevatedButton('Modificar Estoque', on_click=modificar_item)
+    botao_3 = ft.ElevatedButton('Alterar Informações', on_click=alterar_informacoes_do_produto)
     botao_4 = ft.ElevatedButton('Remover Item', on_click=remover_item_do_estoque)
     botao_5 = ft.ElevatedButton('Sair', on_click=sair)
     Botões = ft.Row([botao_1, botao_2, botao_3, botao_4, botao_5])
