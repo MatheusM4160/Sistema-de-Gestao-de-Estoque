@@ -208,6 +208,101 @@ def main(page):
         page.add(descobrir_item)
         page.add(botoes_do_modificar_item)     
 
+    def alterar_estoque(e):
+        page.remove(Botões)
+
+        def sair(e):
+            page.remove(descobrir_item, botoes_do_alterar_estoque)
+            page.add(Botões)
+        
+        def procurar(e):
+            def voltar(e):
+                for botao in lista_botao:
+                    page.remove(botao)
+                page.remove(voltar_inicial)
+                lista_botao.clear()
+                page.add(Botões)
+
+            def alterar_quantidade(numerador, produto):
+                for botao in lista_botao:
+                    page.remove(botao)
+                page.remove(voltar_inicial)
+                lista_botao.clear()
+
+                def sair_alterar_estoque(e):
+                    page.remove(alteraçoes)
+                    page.remove(sair_alterar)
+                    page.add(Botões)
+
+                def aumentar_estoque(e):
+                    quant = estoque[numerador][produto]['quantidade']
+                    quant = quant + 1
+                    estoque[numerador][produto]['quantidade'] = quant
+                    armazenamento.escrever(estoque)
+                    quantidade_atual.value = quant
+                    page.update(quantidade_atual)
+
+                def diminuir_estoque(e):
+                    quant = estoque[numerador][produto]['quantidade']
+                    quant = quant - 1
+                    estoque[numerador][produto]['quantidade'] = quant
+                    armazenamento.escrever(estoque)
+                    quantidade_atual.value = quant
+                    page.update(quantidade_atual)
+                
+                aumentar = ft.IconButton(icon=ft.icons.ADD, on_click=aumentar_estoque)
+                quantidade_atual = ft.Text(estoque[numerador][produto]['quantidade'], size=50)
+                diminuir = ft.IconButton(icon=ft.icons.REMOVE, on_click=diminuir_estoque)
+                alteraçoes = ft.Row([aumentar, quantidade_atual, diminuir])
+
+                sair_alterar = ft.ElevatedButton('Sair', on_click=sair_alterar_estoque)
+
+                page.add(sair_alterar)
+                page.add(alteraçoes)
+                page.update(quantidade_atual)
+
+            voltar_inicial = ft.ElevatedButton('Voltar', on_click=voltar)
+
+            produto_procurado = descobrir_item.value
+            produto_procurado = produto_procurado.strip().capitalize()
+
+            lista_botao = []
+            cont = 0
+            numerador = -1
+            num = 0
+
+            if descobrir_item.value != '':
+                for item in estoque:
+                    for produto in item:
+                        if produto_procurado in produto:
+                            if num == 0:
+                                page.remove(descobrir_item, botoes_do_alterar_estoque)
+                                page.add(voltar_inicial)
+                            numerador = cont
+                            botao_item = ft.ElevatedButton(produto, on_click=lambda e, numerador=numerador, produto=produto: alterar_quantidade(numerador, produto))
+                            page.add(botao_item)
+                            lista_botao.append(botao_item)
+                            num = 1
+                    cont = cont + 1
+                if numerador == -1:
+                    Erro.open = True
+                    page.add(Erro)
+            else:
+                Erro.open = True
+                page.add(Erro)
+
+        descobrir_item = ft.TextField(label='Procurar Item')
+
+        botao_procurar = ft.ElevatedButton('Procurar', on_click=procurar)
+        botao_sair = ft.ElevatedButton('Sair', on_click=sair)
+ 
+        botoes_do_alterar_estoque = ft.Row([botao_procurar, botao_sair])
+
+        page.add(descobrir_item)
+        page.add(botoes_do_alterar_estoque)     
+        
+        
+
     def adicionar_item(e):
         def sair_do_adicionar_item(e):
             page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, botoes_do_adicionar_itens)
@@ -305,10 +400,11 @@ def main(page):
 
     botao_1 = ft.ElevatedButton('Ver Estoque', on_click=ver_estoque)
     botao_2 = ft.ElevatedButton('Adicionar Item', on_click=adicionar_item)
-    botao_3 = ft.ElevatedButton('Alterar Informações', on_click=alterar_informacoes_do_produto)
-    botao_4 = ft.ElevatedButton('Remover Item', on_click=remover_item_do_estoque)
-    botao_5 = ft.ElevatedButton('Sair', on_click=sair)
-    Botões = ft.Row([botao_1, botao_2, botao_3, botao_4, botao_5])
+    botao_3 = ft.ElevatedButton('Alterar Estoque', on_click=alterar_estoque)
+    botao_4 = ft.ElevatedButton('Alterar Informações', on_click=alterar_informacoes_do_produto)
+    botao_5 = ft.ElevatedButton('Remover Item', on_click=remover_item_do_estoque)
+    botao_6 = ft.ElevatedButton('Sair', on_click=sair)
+    Botões = ft.Row([botao_1, botao_2, botao_3, botao_4, botao_5, botao_6])
 
     page.add(titulo)
     page.add(Botões)
