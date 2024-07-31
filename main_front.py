@@ -103,6 +103,7 @@ def main(page):
         def produto_encontrado_do_modificar(a, b):
             for botao in lista_botao:
                 page.remove(botao)
+            page.remove(voltar_inicio)
             lista_botao.clear()
 
             def sair(e):
@@ -167,6 +168,7 @@ def main(page):
             global lista_botao
             lista_botao = []
 
+            global voltar_inicio
             voltar_inicio = ft.ElevatedButton('Voltar', on_click=voltar)
 
             produto_procurado = descobrir_item.value
