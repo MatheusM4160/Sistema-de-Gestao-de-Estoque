@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "Tecido": {
+      "descricao": ".",
+      "valor": 100.0,
+      "quantidade": 3
+    }
+  }
+]

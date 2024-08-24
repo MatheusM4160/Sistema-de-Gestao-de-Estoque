@@ -3,18 +3,22 @@ import armazenamento
 
 
 def main(page):
+    page.theme_mode = ft.ThemeMode.DARK
+
     estoque = armazenamento.ler()
+    lista_pedidos = armazenamento.ler_pedidos()
     titulo = ft.Text('Gerenciamente de Estoque', theme_style=ft.TextThemeStyle.BODY_LARGE)
     
+    #função para fechar o pop de erro
     def fechar_erro(e):
         Erro.open = False
         page.update(Erro)
 
+    #função para fechar o pop de produto já cadastrado
     def fechar_produto(e):
         Produto_cadastrado.open = False
         page.update(Produto_cadastrado)
     
-
 
     titulo_erro = ft.Text('Erro!')
     campo_erro = ft.Text('Informações Inválidas!')
@@ -25,7 +29,7 @@ def main(page):
     Produto_cadastrado = ft.AlertDialog(title=titulo_erro, content=campo_produto_ja_cadastrado, actions=[botao_produto])
 
 
-
+    #função que é chamada após o botão de "remover item" ser acionada
     def remover_item_do_estoque(e):
         page.remove(Botões)
 
@@ -35,7 +39,6 @@ def main(page):
             page.update()
 
         def procurar_item(e):
-
             def voltar(e):
                 for botao in lista_botoes:
                     page.remove(botao)
@@ -92,8 +95,61 @@ def main(page):
         page.add(descobrir_item)
         page.add(botoes_do_remover_item)
 
-    def alterar_informacoes_do_produto(e):
+    #função para ver os pedidos, pendentes e concluidos, após o "Ver pedidos" ser clicado
+    def ver_pedidos(e):
+        page.remove(Botões)
 
+        lista_pendentes = []
+        lista_concluidos = []
+        for pedidos in lista_pedidos:
+            
+            data = str(pedidos['data'])
+            dia = data[:2]
+            mes = data[2:]
+            data_modificada = f"{dia}/{mes}"
+
+            
+            if pedidos["id"] == 0:
+                check = ft.Checkbox(label=f"{pedidos['produto']} - {data_modificada}", value=False)
+                lista_pendentes.append(check)
+            elif pedidos["id"] == 1:
+                check = ft.Checkbox(label=f"{pedidos['produto']} - {data_modificada}", value=True)
+                lista_concluidos.append(check)
+
+    #função para adicionar pedidos após "Novo Pedido" for clicado
+    def pedido_de_produto(e):
+        page.remove(Botões)
+
+        #remove as funcionalidas de "Novo Pedido" e adiciona os Botões iniciais
+        def sair():
+            page.remove(botoes_de_ação, campo_informações)
+            page.add(Botões)
+
+        #salva novo pedido
+        def salvar_pedido(e):
+            produto = nome.value
+            data = data_pedido.value.strip()
+            novo_pedido = {'produto': produto,
+                           'data': data,
+                           'id': 0}
+            lista_pedidos.append(novo_pedido)
+            armazenamento.escrever_pedidos(lista_pedidos)
+            sair()
+
+        #funcionalidades da primeira aba
+        botao_sair = ft.ElevatedButton('Sair', on_click=sair)
+        salvar_inf = ft.ElevatedButton('Salvar Pedido', on_click=salvar_pedido)
+        botoes_de_ação = ft.Row([botao_sair, salvar_inf])
+
+        nome = ft.TextField(label='Novo Pedido')
+        data_pedido = ft.TextField(label='DD MM')
+        campo_informações = ft.Row([nome, data_pedido])
+        
+        #adiciona as funcionalidades a pagina
+        page.add(botoes_de_ação, campo_informações)          
+
+    #função que é acionada após o botão"alterar informação" ser clicado
+    def alterar_informacoes_do_produto(e):
         page.remove(Botões)
 
         def sair_do_modificar_item(e):
@@ -208,14 +264,19 @@ def main(page):
         page.add(descobrir_item)
         page.add(botoes_do_modificar_item)     
 
+    #Função que é chamada após o botão "alterar estoque" ser clicado
     def alterar_estoque(e):
+        #remove os botoes iniciais da pagina
         page.remove(Botões)
 
+        #remove as funcionalidades do "alterar_estoque" e adiciona os botões iniciais
         def sair(e):
             page.remove(descobrir_item, botoes_do_alterar_estoque)
             page.add(Botões)
         
+        #função chamada após o botão "procurar" ser clicado
         def procurar(e):
+            #função que tirar tudo da pagina e adiciona os botões iniciais a pagina
             def voltar(e):
                 for botao in lista_botao:
                     page.remove(botao)
@@ -223,54 +284,82 @@ def main(page):
                 lista_botao.clear()
                 page.add(Botões)
 
+            #função mãe que vai alterar o estoque do item escolhido
             def alterar_quantidade(numerador, produto):
+                #remove a lista de itens que são encontrados e limpa a lista
                 for botao in lista_botao:
                     page.remove(botao)
                 page.remove(voltar_inicial)
                 lista_botao.clear()
 
+                #função que retira as funcionalidades da pagina e adiciona os botões iniciais
                 def sair_alterar_estoque(e):
+                    page.remove(quantidade_desejada_para_remover)
                     page.remove(alteraçoes)
                     page.remove(sair_alterar)
                     page.add(Botões)
+                
+                #função que vai verificar o "valor" de "quantidade_desejada_para_remover"
+                def checar_remover():
+                    if quantidade_desejada_para_remover.value == '':
+                        variavel = 1
+                    else:
+                        try:
+                            variavel = int(quantidade_desejada_para_remover.value)
+                        except:
+                            Erro.open = True
+                            page.add(Erro)
 
+                    return variavel
+
+                #função que aumenta o estoque do produto após o botão "aumentar" for acionado
                 def aumentar_estoque(e):
+                    aumentar = checar_remover()
+
                     quant = estoque[numerador][produto]['quantidade']
-                    quant = quant + 1
+                    quant = quant + aumentar
                     estoque[numerador][produto]['quantidade'] = quant
                     armazenamento.escrever(estoque)
                     quantidade_atual.value = quant
                     page.update(quantidade_atual)
 
+                #função que reduz o estoque do produto após o botão "diminuir" for acionado
                 def diminuir_estoque(e):
+                    diminuir = checar_remover()
                     quant = estoque[numerador][produto]['quantidade']
-                    quant = quant - 1
+                    quant = quant - diminuir
                     estoque[numerador][produto]['quantidade'] = quant
                     armazenamento.escrever(estoque)
                     quantidade_atual.value = quant
                     page.update(quantidade_atual)
                 
+                #funcionalidades da pagina
+                sair_alterar = ft.ElevatedButton('Sair', on_click=sair_alterar_estoque)
+                quantidade_desejada_para_remover = ft.TextField(label="Quantidade desejada")
                 aumentar = ft.IconButton(icon=ft.icons.ADD, on_click=aumentar_estoque)
                 quantidade_atual = ft.Text(estoque[numerador][produto]['quantidade'], size=50)
                 diminuir = ft.IconButton(icon=ft.icons.REMOVE, on_click=diminuir_estoque)
                 alteraçoes = ft.Row([aumentar, quantidade_atual, diminuir])
 
-                sair_alterar = ft.ElevatedButton('Sair', on_click=sair_alterar_estoque)
-
+                #adicina as funcionalidades a pagina
                 page.add(sair_alterar)
+                page.add(quantidade_desejada_para_remover)
                 page.add(alteraçoes)
                 page.update(quantidade_atual)
-
+            
+            #chama a funçã "voltar"
             voltar_inicial = ft.ElevatedButton('Voltar', on_click=voltar)
 
             produto_procurado = descobrir_item.value
             produto_procurado = produto_procurado.strip().capitalize()
 
+            #variaveis
             lista_botao = []
             cont = 0
             numerador = -1
             num = 0
 
+            #funcionalidade para procurar o item no estoque e dps adicionar eles a pagina
             if descobrir_item.value != '':
                 for item in estoque:
                     for produto in item:
@@ -291,18 +380,21 @@ def main(page):
                 Erro.open = True
                 page.add(Erro)
 
+        #caixa de texto para descobrir item
         descobrir_item = ft.TextField(label='Procurar Item')
 
+        #botões para procurar o item ou sair do "alterar item"
         botao_procurar = ft.ElevatedButton('Procurar', on_click=procurar)
         botao_sair = ft.ElevatedButton('Sair', on_click=sair)
  
+        #coloca os botões acima em uma linha
         botoes_do_alterar_estoque = ft.Row([botao_procurar, botao_sair])
 
+        #adiciona as funcionalidades do "alterar estoque" à pagina
         page.add(descobrir_item)
         page.add(botoes_do_alterar_estoque)     
         
-        
-
+    #função que adiciona item ao estoque após o botão "adicionar" for clicado
     def adicionar_item(e):
         def sair_do_adicionar_item(e):
             page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, botoes_do_adicionar_itens)
@@ -362,6 +454,7 @@ def main(page):
         page.add(campo_nome, campo_descricao, campo_valor, campo_quantidade)
         page.add(botoes_do_adicionar_itens)
         
+    #função para ver o estoque após o botão "ver estoque" for clicado
     def ver_estoque(e):
         page.remove(Botões)
 
@@ -398,13 +491,16 @@ def main(page):
     def sair(e):
         page.window_close()   
 
+    #todos os botões da pagina inicial
     botao_1 = ft.ElevatedButton('Ver Estoque', on_click=ver_estoque)
     botao_2 = ft.ElevatedButton('Adicionar Item', on_click=adicionar_item)
     botao_3 = ft.ElevatedButton('Alterar Estoque', on_click=alterar_estoque)
     botao_4 = ft.ElevatedButton('Alterar Informações', on_click=alterar_informacoes_do_produto)
-    botao_5 = ft.ElevatedButton('Remover Item', on_click=remover_item_do_estoque)
-    botao_6 = ft.ElevatedButton('Sair', on_click=sair)
-    Botões = ft.Row([botao_1, botao_2, botao_3, botao_4, botao_5, botao_6])
+    botao_5 = ft.ElevatedButton('Novo Pedido', on_click=pedido_de_produto)
+    botao_6 = ft.ElevatedButton('Ver Pedidos', on_click=ver_pedidos)
+    botao_7 = ft.ElevatedButton('Remover Item', on_click=remover_item_do_estoque)
+    botao_8 = ft.ElevatedButton('Sair', on_click=sair)
+    Botões = ft.Row([botao_1, botao_2, botao_3, botao_4, botao_5, botao_6, botao_7, botao_8])
 
     page.add(titulo)
     page.add(Botões)

@@ -27,18 +27,20 @@ def adicionar(pergunta, num = 1):
                 return nome
 
 def Produto():   
-
     nome = adicionar('Nome do produto: ')
-    
-    descricao = adicionar('Descricao do produto: ')
-        
+    descricao = adicionar('Descricao do produto: ')     
     valor = adicionar('Valor do porduto: ', 2)
-
     quantidade = adicionar('quantidade do produto: ', 3)
-
     produto_novo = {nome : 
                  {'descricao' : descricao,
                   'valor' : valor,
-                  'quantidade' : quantidade}}
-    
+                  'quantidade' : quantidade}}    
     return produto_novo
+
+def ler_pedidos():
+    with open('Dados/pedidos.json', 'r') as arq:
+        return json.load(arq)
+    
+def escrever_pedidos(dic):
+    with open('Dados/pedidos.json', 'w') as arq:
+        json.dump(dic, arq, indent=2)
