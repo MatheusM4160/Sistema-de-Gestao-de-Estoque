@@ -99,30 +99,92 @@ def main(page):
     def ver_pedidos(e):
         page.remove(Botões)
 
+        #vai sair da função "Ver pedidos" e caso o tenho alguma alteração do ""id"" vai mudar e salvar a nova alteração
+        def sair_ver_pedidos(e):
+            for check in lista_pendentes:
+                valor = check['check']
+                if valor.value == True:
+                    lista_pedidos[check['index']]['id'] = 1
+                else:
+                    lista_pedidos[check['index']]['id'] = 0
+            
+            armazenamento.escrever_pedidos(lista_pedidos)
+
+            page.remove(botao_sair)
+            page.remove(abas)
+            page.add(Botões)
+
         lista_pendentes = []
         lista_concluidos = []
+
+        aba_pendentes = ft.Column()
+        aba_concluidos = ft.Column()
+
+        index = 0
+
         for pedidos in lista_pedidos:
-            
+
             data = str(pedidos['data'])
             dia = data[:2]
             mes = data[2:]
             data_modificada = f"{dia}/{mes}"
 
+            check = ft.Checkbox(label=f"{pedidos['produto']} - {data_modificada}", value=(pedidos['id'] == 1))
+
+            produto_index = {'index': index,
+                             'check': check}
+            index = index + 1
             
             if pedidos["id"] == 0:
-                check = ft.Checkbox(label=f"{pedidos['produto']} - {data_modificada}", value=False)
-                lista_pendentes.append(check)
-            elif pedidos["id"] == 1:
-                check = ft.Checkbox(label=f"{pedidos['produto']} - {data_modificada}", value=True)
-                lista_concluidos.append(check)
+                lista_pendentes.append(produto_index)
+                aba_pendentes.controls.append(check)
+            elif pedidos["id"] == 1:               
+                lista_concluidos.append(produto_index)
+                aba_concluidos.controls.append(check)
 
+        #logica para escrever as abas
+        abas = ft.Tabs(
+            selected_index=0,
+            animation_duration=200,
+            tabs=[
+                ft.Tab(
+                    text='Pendentes',
+                    content=ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                aba_pendentes
+                            ]
+                        ),
+                        padding=10
+                    )
+                ),
+                ft.Tab(
+                    text='Concluidos',
+                    content=ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                aba_concluidos
+                            ]
+                        ),
+                        padding=10
+                    )
+                )
+            ]
+        )
+
+        botao_sair = ft.ElevatedButton('Sair', on_click=sair_ver_pedidos)
+
+        page.add(botao_sair)
+        page.add(abas)
+        
     #função para adicionar pedidos após "Novo Pedido" for clicado
     def pedido_de_produto(e):
         page.remove(Botões)
 
         #remove as funcionalidas de "Novo Pedido" e adiciona os Botões iniciais
         def sair():
-            page.remove(botoes_de_ação, campo_informações)
+            page.remove(botoes_de_ação)
+            page.remove(campo_informações)
             page.add(Botões)
 
         #salva novo pedido
@@ -146,7 +208,8 @@ def main(page):
         campo_informações = ft.Row([nome, data_pedido])
         
         #adiciona as funcionalidades a pagina
-        page.add(botoes_de_ação, campo_informações)          
+        page.add(botoes_de_ação)
+        page.add(campo_informações)          
 
     #função que é acionada após o botão"alterar informação" ser clicado
     def alterar_informacoes_do_produto(e):
