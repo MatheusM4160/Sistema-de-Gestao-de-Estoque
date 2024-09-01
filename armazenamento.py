@@ -8,6 +8,8 @@ def ler():
 
 def escrever(dic):
     """Função para escrever os dados em .json"""
+    dic = sorted(dic, key=lambda d: list(d.keys())[0])
+
     with open('Dados/dados.json', 'w') as arq:
         json.dump(dic, arq, indent=2)
 

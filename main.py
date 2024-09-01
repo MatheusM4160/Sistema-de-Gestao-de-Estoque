@@ -2,7 +2,7 @@ import flet as ft
 import armazenamento
 
 
-def main(page):
+def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
 
     estoque = armazenamento.ler()
@@ -73,7 +73,7 @@ def main(page):
                                 page.remove(descobrir_item, botoes_do_remover_item)
                                 page.add(voltar_ao_inicio)
                             numerador = cont
-                            botao_remover = ft.ElevatedButton(produto, on_click=lambda e, p=produto, cont=numerador: remover_item(p, cont)) 
+                            botao_remover = ft.ElevatedButton(f'{produto}/{item[produto]['fornecedor']}', on_click=lambda e, p=produto, cont=numerador: remover_item(p, cont)) 
                             lista_botoes.append(botao_remover)
                             page.add(botao_remover)
                             num = 1
@@ -182,7 +182,7 @@ def main(page):
         page.remove(Botões)
 
         #remove as funcionalidas de "Novo Pedido" e adiciona os Botões iniciais
-        def sair():
+        def sair(e):
             page.remove(botoes_de_ação)
             page.remove(campo_informações)
             page.add(Botões)
@@ -190,13 +190,14 @@ def main(page):
         #salva novo pedido
         def salvar_pedido(e):
             produto = nome.value
-            data = data_pedido.value.strip()
+            data = data_pedido.value.strip().replace('-', '').replace('/', '')
+            data = f'{data[:2]}/{data[2:4]}/{data[4:]}'
             novo_pedido = {'produto': produto,
                            'data': data,
                            'id': 0}
             lista_pedidos.append(novo_pedido)
             armazenamento.escrever_pedidos(lista_pedidos)
-            sair()
+            sair(e)
 
         #funcionalidades da primeira aba
         botao_sair = ft.ElevatedButton('Sair', on_click=sair)
@@ -204,7 +205,7 @@ def main(page):
         botoes_de_ação = ft.Row([botao_sair, salvar_inf])
 
         nome = ft.TextField(label='Novo Pedido')
-        data_pedido = ft.TextField(label='DD MM')
+        data_pedido = ft.TextField(label='DD-MM-YYYY')
         campo_informações = ft.Row([nome, data_pedido])
         
         #adiciona as funcionalidades a pagina
@@ -226,15 +227,32 @@ def main(page):
             lista_botao.clear()
 
             def sair(e):
-                page.remove(alterar_descricao, alterar_valor, alterar_quantidade, botoes)
+                page.remove(alterar_descricao, alterar_valor, alterar_quantidade, alterar_fornecedor, alterar_telefone, botoes)
                 page.add(Botões)
 
             def salvar(produto, numero):
                 cont = 1
                 if alterar_descricao.value != '':
-                    nova_descricao = alterar_descricao.value
-                    nova_descricao = nova_descricao.strip().capitalize()
+                    nova_descricao = alterar_descricao.value.strip().capitalize()
                     estoque[numero][produto]['descricao'] = nova_descricao
+
+                if alterar_fornecedor.value != '':
+                    novo_fornecedor = alterar_fornecedor.value.strip().capitalize()
+                    estoque[numero][produto]['fornecedor'] = novo_fornecedor
+
+                if alterar_telefone != '':
+                    novo_telefone = alterar_telefone.value.strip()
+                    novo_telefone = novo_telefone.replace('-', '')
+                    novo_telefone = novo_telefone.replace('(', '')
+                    novo_telefone = novo_telefone.replace(')', '')
+                    try:
+                        novo_telefone = int(novo_telefone)
+                    except:
+                        cont = 0
+                    else:
+                        novo_telefone = str(novo_telefone)
+                        novo_telefone = f'({novo_telefone[:2]}){novo_telefone[2:-4]}-{novo_telefone[-4:]}'
+                        estoque[numero][produto]['telefone'] = novo_telefone
                 
                 if alterar_valor.value != '':
                     try:
@@ -260,7 +278,7 @@ def main(page):
                 armazenamento.escrever(estoque)
 
                 if cont == 1:
-                    page.remove(alterar_descricao, alterar_valor, alterar_quantidade, botoes)
+                    page.remove(alterar_descricao, alterar_valor, alterar_quantidade, alterar_fornecedor, alterar_telefone, botoes)
                     page.add(Botões)
                 else:
                     Erro.open = True
@@ -269,12 +287,14 @@ def main(page):
             alterar_descricao = ft.TextField(label='Nova Descrição')
             alterar_valor = ft.TextField(label='Novo Valor')
             alterar_quantidade = ft.TextField(label='Nova Quantidade')
+            alterar_fornecedor = ft.TextField(label='Novo Fornecedor')
+            alterar_telefone = ft.TextField(label='(xx)xxxxx-xxxx')
 
             botao_salvar_alteracao = ft.ElevatedButton('Salvar Alteração', on_click=lambda e:salvar(a, b))
             botao_sair_sem_salvar = ft.ElevatedButton('Sair sem Salvar', on_click=sair)
             botoes = ft.Row([botao_salvar_alteracao, botao_sair_sem_salvar])
 
-            page.add(alterar_descricao, alterar_valor, alterar_quantidade, botoes)
+            page.add(alterar_descricao, alterar_valor, alterar_quantidade, alterar_fornecedor, alterar_telefone, botoes)
             
         def procurar_item(e):
             def voltar(e):
@@ -305,7 +325,7 @@ def main(page):
                                 page.remove(descobrir_item, botoes_do_modificar_item)
                                 page.add(voltar_inicio)
                             numerador = cont
-                            botao_item = ft.ElevatedButton(produto, on_click=lambda e, numerador=numerador, produto=produto: produto_encontrado_do_modificar(produto, numerador))
+                            botao_item = ft.ElevatedButton(f'{produto}/{item[produto]['fornecedor']}', on_click=lambda e, numerador=numerador, produto=produto: produto_encontrado_do_modificar(produto, numerador))
                             page.add(botao_item)
                             lista_botao.append(botao_item)
                             num = 1
@@ -339,6 +359,7 @@ def main(page):
         
         #função chamada após o botão "procurar" ser clicado
         def procurar(e):
+
             #função que tirar tudo da pagina e adiciona os botões iniciais a pagina
             def voltar(e):
                 for botao in lista_botao:
@@ -430,12 +451,15 @@ def main(page):
                             if num == 0:
                                 page.remove(descobrir_item, botoes_do_alterar_estoque)
                                 page.add(voltar_inicial)
+
                             numerador = cont
-                            botao_item = ft.ElevatedButton(produto, on_click=lambda e, numerador=numerador, produto=produto: alterar_quantidade(numerador, produto))
+                            botao_item = ft.ElevatedButton(f'{produto}/{item[produto]['fornecedor']}', on_click=lambda e, numerador=numerador, produto=produto: alterar_quantidade(numerador, produto))
                             page.add(botao_item)
                             lista_botao.append(botao_item)
                             num = 1
+                            
                     cont = cont + 1
+                    
                 if numerador == -1:
                     Erro.open = True
                     page.add(Erro)
@@ -460,7 +484,7 @@ def main(page):
     #função que adiciona item ao estoque após o botão "adicionar" for clicado
     def adicionar_item(e):
         def sair_do_adicionar_item(e):
-            page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, botoes_do_adicionar_itens)
+            page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, campo_cliente, campo_telefone, botoes_do_adicionar_itens)
             page.add(Botões)
             page.update()
             
@@ -468,22 +492,25 @@ def main(page):
             num = 0
             for item in estoque:
                 for produto in item:
-                    if campo_nome.value.strip().capitalize() == produto:
+                    if campo_nome.value.strip().capitalize() == produto and campo_cliente.value.strip().capitalize() == item[produto]['fornecedor']:
                         num = 1
-            if campo_nome.value == '' or campo_descricao.value == '' or campo_valor.value == '' or campo_quantidade.value == '':
+            if campo_nome.value == '' or campo_valor.value == '' or campo_quantidade.value == '' or campo_cliente == '' or campo_telefone == '':
                 Erro.open = True
                 page.add(Erro)
             elif num == 1:
                 Produto_cadastrado.open = True
                 page.add(Produto_cadastrado)
             else:
-                page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, botoes_do_adicionar_itens)
+                page.remove(campo_nome, campo_descricao, campo_valor, campo_quantidade, campo_cliente, campo_telefone, botoes_do_adicionar_itens)
                 page.add(Botões)
 
-                novo_nome = campo_nome.value
-                novo_nome = novo_nome.strip().capitalize()
-                nova_descricao = campo_descricao.value
-                nova_descricao = nova_descricao.strip().capitalize()
+                if campo_descricao.value != '':
+                    nova_descricao = campo_descricao.value.strip().upper()
+                else:
+                    nova_descricao = 'INDEFINIDO'
+
+                novo_nome = campo_nome.value.strip().capitalize()
+                novo_fornecedor = campo_cliente.value.strip().capitalize()
 
                 try:
                     valor = campo_valor.value
@@ -492,14 +519,23 @@ def main(page):
 
                     quantidade = campo_quantidade.value
                     nova_quantidade = int(quantidade)
+
+                    novo_telefone = campo_telefone.value
+                    novo_telefone = novo_telefone.replace('-', '').replace('(', '').replace(')', '')
+                    novo_telefone = int(novo_telefone)
                 except:
                     Erro.open = True
                     page.add(Erro)
 
+                novo_telefone = str(novo_telefone)
+                novo_telefone = f'({novo_telefone[:2]}){novo_telefone[2:-4]}-{novo_telefone[-4:]}'
+
                 produto_novo = {novo_nome : 
                     {'descricao' : nova_descricao,
                     'valor' : novo_valor,
-                    'quantidade' : nova_quantidade}}
+                    'quantidade' : nova_quantidade,
+                    'fornecedor': novo_fornecedor,
+                    'telefone': novo_telefone}}
                 
                 estoque.append(produto_novo)
                 armazenamento.escrever(estoque)
@@ -509,16 +545,19 @@ def main(page):
         campo_descricao = ft.TextField(label='Descrição do Produto')
         campo_valor = ft.TextField(label='Valor do Produto')
         campo_quantidade = ft.TextField(label='Quantidade do Produto')
+        campo_cliente = ft.TextField(label='Nome Fornecedor')
+        campo_telefone = ft.TextField(label='(xx)xxxxx-xxxx')
 
         eniar_informacoes = ft.ElevatedButton('Salvar Produto', on_click=sair_estoque_e_enviar_informacao)
         botao_sair = ft.ElevatedButton('Sair', on_click=sair_do_adicionar_item)
         botoes_do_adicionar_itens = ft.Row([eniar_informacoes, botao_sair])
 
-        page.add(campo_nome, campo_descricao, campo_valor, campo_quantidade)
+        page.add(campo_nome, campo_descricao, campo_valor, campo_quantidade, campo_cliente, campo_telefone)
         page.add(botoes_do_adicionar_itens)
         
     #função para ver o estoque após o botão "ver estoque" for clicado
     def ver_estoque(e):
+        estoque_ver = armazenamento.ler()
         page.remove(Botões)
 
         def sair_estoque(e):
@@ -529,17 +568,21 @@ def main(page):
             ft.DataColumn(label=ft.Text('Produto')),
             ft.DataColumn(label=ft.Text('Descrição')),
             ft.DataColumn(label=ft.Text('Valor')),
-            ft.DataColumn(label=ft.Text('Quantidade'))
+            ft.DataColumn(label=ft.Text('Quantidade')),
+            ft.DataColumn(label=ft.Text('Fornecedor')),
+            ft.DataColumn(label=ft.Text('Telefone'))
             ]
         
         linhas = []
-        for item in estoque:
+        for item in estoque_ver:
             for nome_produto, detalhes_produto in item.items():
                 linha = ft.DataRow(cells=[
                     ft.DataCell(ft.Text(nome_produto)),
                     ft.DataCell(ft.Text(detalhes_produto['descricao'])),
                     ft.DataCell(ft.Text(detalhes_produto['valor'])),
                     ft.DataCell(ft.Text(detalhes_produto['quantidade'])),
+                    ft.DataCell(ft.Text(detalhes_produto['fornecedor'])),
+                    ft.DataCell(ft.Text(detalhes_produto['telefone']))
                     ]
                 )
                 linhas.append(linha)
@@ -568,4 +611,4 @@ def main(page):
     page.add(titulo)
     page.add(Botões)
 
-ft.app(main)
+ft.app(target=main)
