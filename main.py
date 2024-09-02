@@ -1,6 +1,7 @@
 import flet as ft
 import armazenamento
 
+#CONTINUAR MEXENDO NA LINHA 182 EM DIANTE
 
 def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
@@ -177,14 +178,16 @@ def main(page: ft.Page):
         page.add(botao_sair)
         page.add(abas)
         
+
+    #EM MANUTENÇÃO
     #função para adicionar pedidos após "Novo Pedido" for clicado
     def pedido_de_produto(e):
         page.remove(Botões)
 
         #remove as funcionalidas de "Novo Pedido" e adiciona os Botões iniciais
         def sair(e):
-            page.remove(botoes_de_ação)
-            page.remove(campo_informações)
+            page.remove(funcionalidades_de_pesquisa)
+            page.remove(sair_cadastrar)
             page.add(Botões)
 
         #salva novo pedido
@@ -207,10 +210,82 @@ def main(page: ft.Page):
         nome = ft.TextField(label='Novo Pedido')
         data_pedido = ft.TextField(label='DD-MM-YYYY')
         campo_informações = ft.Row([nome, data_pedido])
+
+        #MEXER NESSA FUNCIONALIDADE  
+        abas = ft.Tabs(
+            selected_index=0,
+            animation_duration=200,
+            tabs=[
+                ft.Tab(
+                    text='Novo Pedido',
+                    content=ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                botoes_de_ação,
+                                campo_informações
+                            ]
+                        ),
+                        padding=10
+                    )
+                )
+            ]
+        )
+
+        def produto_encontrado(produto, fornecedor, numerador):
+            page.add(abas)
+
+        def procurar(e):
+            def voltar(e):
+                for botao in lista_botao:
+                    page.remove(botao)
+                page.remove(voltar_inicio)
+                lista_botao.clear()
+                page.add(Botões)
+
+            global lista_botao
+            lista_botao = []
+
+            global voltar_inicio
+            voltar_inicio = ft.ElevatedButton('Voltar', on_click=voltar)
+
+            produto_procurado = pesquisar_produto.value
+            produto_procurado = produto_procurado.strip().capitalize()
+
+            cont = 0
+            numerador = -1
+            num = 0
+
+            if pesquisar_produto.value != '':
+                for item in estoque:
+                    for produto in item:
+                        if produto_procurado in produto:
+                            if num == 0:
+                                page.remove(sair_cadastrar, funcionalidades_de_pesquisa)
+                                page.add(voltar_inicio)
+                            numerador = cont
+                            botao_item = ft.ElevatedButton(f'{produto}/{item[produto]['fornecedor']}', on_click=lambda e, numerador=numerador, produto=produto, fornecedor=item[produto]['fornecedor']: produto_encontrado(produto, fornecedor, numerador))
+                            page.add(botao_item)
+                            lista_botao.append(botao_item)
+                            num = 1
+                    cont = cont + 1
+                if numerador == -1:
+                    Erro.open = True
+                    page.add(Erro)
+            else:
+                Erro.open = True
+                page.add(Erro)
+
+        sair_cadastrar = ft.ElevatedButton('Sair', on_click=sair)
+        pesquisar_produto = ft.TextField(label='Nome do Produto')
+        pesquisar = ft.ElevatedButton('Pesquisar', on_click=procurar)
+        funcionalidades_de_pesquisa = ft.Row([pesquisar_produto, pesquisar])
+
+        page.add(sair_cadastrar, funcionalidades_de_pesquisa)
         
         #adiciona as funcionalidades a pagina
-        page.add(botoes_de_ação)
-        page.add(campo_informações)          
+        #page.add(abas)
+        #page.add(botoes_de_ação)
+        #page.add(campo_informações)          
 
     #função que é acionada após o botão"alterar informação" ser clicado
     def alterar_informacoes_do_produto(e):
