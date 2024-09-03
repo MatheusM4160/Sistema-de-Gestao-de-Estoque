@@ -1,52 +1,30 @@
-import flet as ft
+lista_pedidos = [
+  {
+    "produto": "/",
+    "data": "15/80/9515",
+    "id": 0
+  },
+  {
+    "produto": "/",
+    "data": "15/08/7056",
+    "id": 0
+  },
+  {
+    "produto": "b/a",
+    "data": "50/78/9562",
+    "id": 0
+  },
+  {
+    "produto": "Malha/Puro pano",
+    "data": "24/12/2007",
+    "id": 0
+  }
+]
 
-def main(page: ft.Page):
-    def page_resize(e):
-        pw.value = f"{page.width} px"
-        pw.update()
+cont = -1
 
-    page.on_resize = page_resize
-
-    pw = ft.Text(bottom=50, right=50, style="displaySmall")
-    page.overlay.append(pw)
-    page.add(
-        ft.ResponsiveRow(
-            [
-                ft.Container(
-                    ft.Text("Column 1"),
-                    padding=5,
-                    bgcolor=ft.colors.YELLOW,
-                    col={"sm": 6, "md": 4, "xl": 2},
-                ),
-                ft.Container(
-                    ft.Text("Column 2"),
-                    padding=5,
-                    bgcolor=ft.colors.GREEN,
-                    col={"sm": 6, "md": 4, "xl": 2},
-                ),
-                ft.Container(
-                    ft.Text("Column 3"),
-                    padding=5,
-                    bgcolor=ft.colors.BLUE,
-                    col={"sm": 6, "md": 4, "xl": 2},
-                ),
-                ft.Container(
-                    ft.Text("Column 4"),
-                    padding=5,
-                    bgcolor=ft.colors.PINK_300,
-                    col={"sm": 6, "md": 4, "xl": 2},
-                ),
-            ],
-        ),
-        ft.ResponsiveRow(
-            [
-                ft.TextField(label="TextField 1", col={"md": 4}),
-                ft.TextField(label="TextField 2", col={"md": 4}),
-                ft.TextField(label="TextField 3", col={"md": 4}),
-            ],
-            run_spacing={"xs": 10},
-        ),
-    )
-    page_resize(None)
-
-ft.app(target=main)
+for item in lista_pedidos:
+    cont = cont + 1
+    if item['produto'] == "Malha/Puro pano" and item['data'] == "24/12/2007":
+        lista_pedidos.pop(cont)
+        print(lista_pedidos)

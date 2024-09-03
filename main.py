@@ -1,7 +1,10 @@
 import flet as ft
 import armazenamento
 
-#CONTINUAR MEXENDO NA LINHA 182 EM DIANTE
+#DOCUMENTAR A LINHA 185 EM DIANTE
+
+'''MEXER EM QUE TODA VEZ QUE O PEDIDO FOR DECLARADO CONCLUIDO
+    ALTERE O ARMAZENAMENTO DO PRODUTO CADASTRADO EM QUESTÃO'''
 
 def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
@@ -183,35 +186,89 @@ def main(page: ft.Page):
     #função para adicionar pedidos após "Novo Pedido" for clicado
     def pedido_de_produto(e):
         page.remove(Botões)
+        
+        lista_pedidos = armazenamento.ler_pedidos()
+
+        def produto_encontrado(produto = '', fornecedor = '', numerador = 0):
+            global nome, nome_produto, fornecedor_produto, numerador_produto
+            nome_produto = produto
+            fornecedor_produto = fornecedor
+            numerador_produto = numerador
+            nome = f'{produto}/{fornecedor}'
+            for botao in lista_botao:
+                page.remove(botao)
+            page.remove(voltar_inicio)
+            lista_botao.clear()
+            page.add(abas)
+
+        def sair(e):
+            page.remove(abas)
+            page.add(Botões)    
 
         #remove as funcionalidas de "Novo Pedido" e adiciona os Botões iniciais
-        def sair(e):
+        def sair_inicial(e):
             page.remove(funcionalidades_de_pesquisa)
             page.remove(sair_cadastrar)
             page.add(Botões)
 
         #salva novo pedido
         def salvar_pedido(e):
-            produto = nome.value
-            data = data_pedido.value.strip().replace('-', '').replace('/', '')
-            data = f'{data[:2]}/{data[2:4]}/{data[4:]}'
-            novo_pedido = {'produto': produto,
-                           'data': data,
-                           'id': 0}
-            lista_pedidos.append(novo_pedido)
-            armazenamento.escrever_pedidos(lista_pedidos)
-            sair(e)
+            data_do_pedido = data_pedido.value.strip().replace('-', '').replace('/', '')
+            if len(data_do_pedido) == 8 and data_do_pedido != '':
+                try:
+                    data_do_pedido = int(data_do_pedido)
+                    quantidade_pedido = quantidade_pedido.value
+                    quantidade_pedido = int(quantidade_pedido)
+                except:
+                    Erro.open = True
+                    page.add(Erro)
+                else:
+                    produto = nome
+                    data = data_pedido.value.strip().replace('-', '').replace('/', '')
+                    data = f'{data[:2]}/{data[2:4]}/{data[4:]}'
+                    novo_pedido = {'produto': produto,
+                                'data': data,
+                                'quantidade': quantidade_pedido,
+                                'id': 0}
+                    lista_pedidos.append(novo_pedido)
+                    armazenamento.escrever_pedidos(lista_pedidos)
+                    sair(e)
+            else:
+                Erro.open = True
+                page.add(Erro)
 
         #funcionalidades da primeira aba
         botao_sair = ft.ElevatedButton('Sair', on_click=sair)
         salvar_inf = ft.ElevatedButton('Salvar Pedido', on_click=salvar_pedido)
         botoes_de_ação = ft.Row([botao_sair, salvar_inf])
 
-        nome = ft.TextField(label='Novo Pedido')
+        quantidade_pedido = ft.TextField(label='Quantidade')
         data_pedido = ft.TextField(label='DD-MM-YYYY')
-        campo_informações = ft.Row([nome, data_pedido])
+        campo_informações = ft.Row([quantidade_pedido, data_pedido])
 
-        #MEXER NESSA FUNCIONALIDADE  
+        def remover_pedido(e):
+            cont = -1
+            data_do_pedido = data_pedido.value.strip().replace('-', '').replace('/', '')
+            if len(data_do_pedido) == 8 and data_do_pedido != '':
+                try:
+                    data_do_pedido = int(data_do_pedido)
+                except:
+                    Erro.open = True
+                    page.add(Erro)
+                else:
+                    for item in lista_pedidos:
+                        cont = cont + 1
+                        if item['produto'] == "Malha/Puro pano" and item['data'] == "24/12/2007":
+                            lista_pedidos.pop(cont)
+                            armazenamento.escrever_pedidos(lista_pedidos)
+                    sair(e)
+            else:
+                Erro.open = True
+                page.add(Erro)
+
+        remover_inf = ft.ElevatedButton('Remover Pedido', on_click=remover_pedido)
+        botoes_de_remocao = ft.Row([botao_sair, remover_inf])
+
         abas = ft.Tabs(
             selected_index=0,
             animation_duration=200,
@@ -227,12 +284,21 @@ def main(page: ft.Page):
                         ),
                         padding=10
                     )
+                ),
+                ft.Tab(
+                    text='Excluir Pedido',
+                    content=ft.Container(
+                        content=ft.Column(
+                            controls=[
+                                botoes_de_remocao,
+                                data_pedido
+                            ]
+                        ),
+                        padding=10
+                    )
                 )
             ]
         )
-
-        def produto_encontrado(produto, fornecedor, numerador):
-            page.add(abas)
 
         def procurar(e):
             def voltar(e):
@@ -275,17 +341,12 @@ def main(page: ft.Page):
                 Erro.open = True
                 page.add(Erro)
 
-        sair_cadastrar = ft.ElevatedButton('Sair', on_click=sair)
+        sair_cadastrar = ft.ElevatedButton('Sair', on_click=sair_inicial)
         pesquisar_produto = ft.TextField(label='Nome do Produto')
         pesquisar = ft.ElevatedButton('Pesquisar', on_click=procurar)
         funcionalidades_de_pesquisa = ft.Row([pesquisar_produto, pesquisar])
 
-        page.add(sair_cadastrar, funcionalidades_de_pesquisa)
-        
-        #adiciona as funcionalidades a pagina
-        #page.add(abas)
-        #page.add(botoes_de_ação)
-        #page.add(campo_informações)          
+        page.add(sair_cadastrar, funcionalidades_de_pesquisa)         
 
     #função que é acionada após o botão"alterar informação" ser clicado
     def alterar_informacoes_do_produto(e):
