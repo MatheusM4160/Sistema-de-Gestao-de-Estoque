@@ -224,7 +224,7 @@ def main(page: ft.Page):
                     page.add(Erro)
                 else:
                     produto = nome
-                    data = data_pedido.value.strip().replace('-', '').replace('/', '')
+                    data = str(data_do_pedido)
                     data = f'{data[:2]}/{data[2:4]}/{data[4:]}'
                     novo_pedido = {'produto': produto,
                                 'data': data,
