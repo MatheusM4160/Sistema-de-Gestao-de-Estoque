@@ -1,30 +1,40 @@
-lista_pedidos = [
+#a = 'Malha/Puro pano'
+#print(a)
+#b = a[:a.index('/')]
+#a = a[a.index('/')+1:]
+#print(b)
+#print(a)
+
+estoque = [
   {
-    "produto": "/",
-    "data": "15/80/9515",
-    "id": 0
+    "Malha": {
+      "descricao": "POLILINE BRA 91POLI-09ELAS250G",
+      "valor": 28.0,
+      "quantidade": 510,
+      "fornecedor": "Textil farbe",
+      "telefone": "(27)99997-9220"
+    }
   },
   {
-    "produto": "/",
-    "data": "15/08/7056",
-    "id": 0
+    "Malha": {
+      "descricao": "POLILINE BRA 91POLI-09ELAS250G",
+      "valor": 43.0,
+      "quantidade": 153,
+      "fornecedor": "Puro pano",
+      "telefone": "(27)3721-6003"
+    }
   },
   {
-    "produto": "b/a",
-    "data": "50/78/9562",
-    "id": 0
-  },
-  {
-    "produto": "Malha/Puro pano",
-    "data": "24/12/2007",
-    "id": 0
+    "Tactel": {
+      "descricao": "INDEFINIDO",
+      "valor": 6.58,
+      "quantidade": 230,
+      "fornecedor": "Arteca",
+      "telefone": "(27)3219-1341"
+    }
   }
 ]
 
-cont = -1
-
-for item in lista_pedidos:
-    cont = cont + 1
-    if item['produto'] == "Malha/Puro pano" and item['data'] == "24/12/2007":
-        lista_pedidos.pop(cont)
-        print(lista_pedidos)
+for item in estoque:
+  for produto in item:
+      print(produto)

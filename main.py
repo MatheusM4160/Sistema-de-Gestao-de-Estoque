@@ -101,14 +101,21 @@ def main(page: ft.Page):
 
     #função para ver os pedidos, pendentes e concluidos, após o "Ver pedidos" ser clicado
     def ver_pedidos(e):
+        estoque = armazenamento.ler()
         page.remove(Botões)
 
-        #vai sair da função "Ver pedidos" e caso o tenho alguma alteração do ""id"" vai mudar e salvar a nova alteração
+        #vai sair da função "Ver pedidos" e caso o tenho alguma alteração do ""id"" vai mudar e salvar a nova alteração e vai somar a nova quantidade no produto salvo
         def sair_ver_pedidos(e):
             for check in lista_pendentes:
                 valor = check['check']
                 if valor.value == True:
                     lista_pedidos[check['index']]['id'] = 1
+                    produto_nome_para_mudar = lista_pedidos[check['index']]['produto']
+                    for item in estoque:
+                        for produto in item:
+                            if produto == produto_nome_para_mudar[:produto_nome_para_mudar.index('/')] and item[produto]['fornecedor'] == produto_nome_para_mudar[produto_nome_para_mudar.index('/')+1:]:
+                                item[produto]['quantidade'] = item[produto]['quantidade'] + lista_pedidos[check['index']]['quantidade']
+                                armazenamento.escrever(estoque)
                 else:
                     lista_pedidos[check['index']]['id'] = 0
             
@@ -217,22 +224,23 @@ def main(page: ft.Page):
             if len(data_do_pedido) == 8 and data_do_pedido != '':
                 try:
                     data_do_pedido = int(data_do_pedido)
-                    quantidade_pedido = quantidade_pedido.value
-                    quantidade_pedido = int(quantidade_pedido)
+                    quantidade_do_pedido = quantidade_pedido.value
+                    quantidade_do_pedido = int(quantidade_do_pedido)
                 except:
                     Erro.open = True
                     page.add(Erro)
                 else:
                     produto = nome
-                    data = data_pedido.value.strip().replace('-', '').replace('/', '')
+                    data = str(data_do_pedido)
                     data = f'{data[:2]}/{data[2:4]}/{data[4:]}'
                     novo_pedido = {'produto': produto,
                                 'data': data,
-                                'quantidade': quantidade_pedido,
+                                'quantidade': quantidade_do_pedido,
                                 'id': 0}
                     lista_pedidos.append(novo_pedido)
                     armazenamento.escrever_pedidos(lista_pedidos)
                     sair(e)
+                    print('salvou')
             else:
                 Erro.open = True
                 page.add(Erro)
