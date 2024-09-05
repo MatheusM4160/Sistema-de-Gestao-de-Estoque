@@ -101,6 +101,7 @@ def main(page: ft.Page):
 
     #função para ver os pedidos, pendentes e concluidos, após o "Ver pedidos" ser clicado
     def ver_pedidos(e):
+        lista_pedidos = armazenamento.ler_pedidos()
         estoque = armazenamento.ler()
         page.remove(Botões)
 
