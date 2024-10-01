@@ -1,10 +1,7 @@
 import flet as ft
 import armazenamento
+import datetime
 
-#DOCUMENTAR A LINHA 185 EM DIANTE
-
-'''MEXER EM QUE TODA VEZ QUE O PEDIDO FOR DECLARADO CONCLUIDO
-    ALTERE O ARMAZENAMENTO DO PRODUTO CADASTRADO EM QUESTÃO'''
 
 def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.DARK
@@ -115,6 +112,9 @@ def main(page: ft.Page):
                     for item in estoque:
                         for produto in item:
                             if produto == produto_nome_para_mudar[:produto_nome_para_mudar.index('/')] and item[produto]['fornecedor'] == produto_nome_para_mudar[produto_nome_para_mudar.index('/')+1:]:
+                                data_chegada = str(datetime.datetime.today().date())
+                                data_chegada = f'{data_chegada[8:]}/{data_chegada[5:7]}'
+                                lista_pedidos[check['index']]['data_chegada'] = data_chegada
                                 item[produto]['quantidade'] = item[produto]['quantidade'] + lista_pedidos[check['index']]['quantidade']
                                 armazenamento.escrever(estoque)
                 else:
@@ -138,7 +138,7 @@ def main(page: ft.Page):
 
             data = str(pedidos['data'])
             dia = data[:2]
-            mes = data[2:]
+            mes = data[3:]
             data_modificada = f"{dia}/{mes}"
 
             check = ft.Checkbox(label=f"{pedidos['produto']} - {data_modificada}", value=(pedidos['id'] == 1))
@@ -234,10 +234,13 @@ def main(page: ft.Page):
                     produto = nome
                     data = str(data_do_pedido)
                     data = f'{data[:2]}/{data[2:4]}/{data[4:]}'
+                    data_de_inf = f'{data[:5]}'
                     novo_pedido = {'produto': produto,
                                 'data': data,
                                 'quantidade': quantidade_do_pedido,
-                                'id': 0}
+                                'id': 0,
+                                'data_pedido': data_de_inf,
+                                'data_chegada': 0}
                     lista_pedidos.append(novo_pedido)
                     armazenamento.escrever_pedidos(lista_pedidos)
                     sair(e)
